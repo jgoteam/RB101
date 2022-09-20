@@ -1,0 +1,29 @@
+eng:
+  # Prompts and greetings
+  welcome: "Welcome to Calculator! Enter your name:"
+  hi: "Hi"
+  1st_num: "What's the first number?"
+  2nd_num: "What's the second number?"
+  operator_prompt: "What operation would you like to perform? \n \t 1) add \n \t 2) subtract \n \t 3) multiply \n \t 4) divide \n"
+  restart: "Do you want to perform another calculation? (Y to calculate again)"
+  goodbye: "A history of your calculations follows. Thank you for using the calculator. Goodbye!"
+
+  # Errors
+  error_name: "Make sure to use a valid name."
+  error_num: "That's not a valid number. Try again."
+  error_op: "Must choose 1, 2, 3 or 4"
+
+es:
+  # Prompts and greetings
+  welcome: "¡Bienvenido a Calculadora! Ingrese su nombre:"
+  hi: "Hola"
+  1st_num: "¿Cuál es el primer número?"
+  2nd_num: "¿Cuál es el segundo número?"
+  operator_prompt: "¿Qué operación te gustaría realizar? \n \t 1) sumar \n \t 2) restar \n \t 3) multiplicar \n \t 4) dividir \n"
+  restart: "¿Quieres hacer otro cálculo? (Y volver a calcular)"
+  goodbye: "A continuación se incluye un historial de sus cálculos. Gracias por usar la calculadora. ¡Adiós!"
+
+  # Errors
+  error_name: "Asegúrese de utilizar un nombre válido."
+  error_num: "Asegúrate de usar un nombre válido."
+  error_op: "Debe elegir 1, 2, 3 o 4"

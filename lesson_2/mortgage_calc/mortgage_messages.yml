@@ -1,0 +1,23 @@
+eng:
+  # prompts and greetings
+  welcome: "Welcome to the monthly payment calculator for mortgages/car loans!"
+  options: "\tPress 's' to start \n\tPress 'd' for common loan definitions\n\tPress 'h' for history of calcuations\n\tPress 'q' to quit"
+  main_menu: "--Main Menu--"
+  principal: "What's the loan amount?"
+  apr: "What's the Annual Percentage Rate(APR)?"
+  duration: "What's the duration of this loan (in years)?"
+  goodbye: "Thank you for using the monthly payment calculator. Goodbye!"
+
+  # error messages
+  invalid_option: "That's not a valid input. Please try again."
+
+es:
+  # prompts and greetings
+  welcome: "Welcome to the monthly payment calculator for mortgages/car loans!"
+  options: "\tPress 's' to start \tPress 'd' for common loan definitions\tPress 'h' for history of calcuations."
+  main_menu: "--Main Menu--"
+  principal: "What's the loan amount?"
+  apr: "What's the Annual Percentage Rate(APR)?"
+  duration: "What's the duration of this loan (in years)?"
+
+  # error messages
