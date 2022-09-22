@@ -19,7 +19,7 @@ end
 
 def usd(num)
   if num.to_s().include?('.')
-    new_num = sprintf("%.2f", num)
+    new_num = format("%.2f", num)
     whole, decimal = new_num.split('.')
     count = 4
     until count > whole.size()
