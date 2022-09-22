@@ -1,23 +1,40 @@
-eng:
-  # prompts and greetings
-  welcome: "Welcome to the monthly payment calculator for mortgages/car loans!"
-  options: "\tPress 's' to start \n\tPress 'd' for common loan definitions\n\tPress 'h' for history of calcuations\n\tPress 'q' to quit"
-  main_menu: "--Main Menu--"
-  principal: "What's the loan amount?"
-  apr: "What's the Annual Percentage Rate(APR)?"
-  duration: "What's the duration of this loan (in years)?"
-  goodbye: "Thank you for using the monthly payment calculator. Goodbye!"
+# prompts and greetings
+welcome: "Welcome to the mortgage calculator!"
+options: "--Main Menu--\n\t- Enter 'c' to use the calculator \n\t- Enter 'd' for common loan definitions\n\t- Enter 'h' for history of calcuations\n\t- Enter 'q' to quit "
+principal: "What's the mortgage amount in dollars? "
+apr: "What's the Annual Percentage Rate(APR) as a percentage? (0 - 100) "
+duration: "What's the duration of this mortgage (in months)? "
+calculate_again: "Make another calculation? (Enter 'y' to calculate again): "
+no_history: "You haven't put in any calculations yet!"
+history: "--History--"
+goodbye: "Thank you for using the monthly payment calculator for mortgages. Goodbye!"
 
-  # error messages
-  invalid_option: "That's not a valid input. Please try again."
+# error messages
+invalid_option: "That's not a valid option. Please try again."
+invalid_p: "Mortgage amounts are in whole positive dollar amounts only. Please try again."
+invalid_apr: "APR should be a number between 0 - 100 only. Please try again."
+invalid_duration: "Mortgage duration in months should be a whole number between 1 - 600 only. Please try again."
 
-es:
-  # prompts and greetings
-  welcome: "Welcome to the monthly payment calculator for mortgages/car loans!"
-  options: "\tPress 's' to start \tPress 'd' for common loan definitions\tPress 'h' for history of calcuations."
-  main_menu: "--Main Menu--"
-  principal: "What's the loan amount?"
-  apr: "What's the Annual Percentage Rate(APR)?"
-  duration: "What's the duration of this loan (in years)?"
+# definitions
+definitions: "\n
+Principal\n
+\tThe principal is the amount of a mortgage loan that you have to pay back.\n
+\tYour monthly payment includes a portion of that principal.\n
+\tWhen a payment on the principal is made, the borrower owes less, and will pay less interest based upon a lower loan size.\n
+\n
+Interest rate\n
+\tAn interest rate on a mortgage loan is the cost you will pay each year to borrow the money, expressed as a percentage rate.\n
+\tIt does not reflect fees or any other charges you may have to pay for the loan. \n
+\n
+APR vs APY\n
+\tAPR does not take into account the compounding of interest within a specific year. \n
+\tAPR is calculated as follows:\n
+\t\tAPR = Periodic Rate x Number of Periods in a Year\n
 
-  # error messages
+\tUnlike APR, APY does take into account the frequency with which the interest is applied—the effects of intra-year compounding.\n
+\tHere's how APY is calculated:\n
+\t\tAPY = (1 + Periodic Rate)^(Number of periods) - 1\n
+\n
+\n
+Definitions for Principal and Interest rate from: https://www.consumerfinance.gov/consumer-tools/mortgages/answers/key-terms/\n
+Comparison between APR and APY from: https://www.investopedia.com/terms/a/apy.asp\n"

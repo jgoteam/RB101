@@ -1,48 +1,115 @@
 require 'yaml'
 MESSAGES = YAML.load_file('mortgage_messages.yml')
-# Set LANGUAGE to 'eng' for English or 'es' for Spanish
-LANGUAGE = "eng"
 
 def prompt(message, post="")
-  message = MESSAGES[LANGUAGE][message]
-  Kernel.puts("=> #{message} #{post}")
+  message = MESSAGES[message]
+  puts("=> #{message} #{post}")
 end
 
-def valid_number?(number)
-  /^[+-]?\d*\.?\d+$/.match(number)
+def valid?(num, option)
+  case option
+  when 'p'
+    /^\d*\.?\d+$/.match(num) && num.to_f() >= 1.00
+  when 'a'
+    /^1?\d?\d{1}\.?\d{0,2}$/.match(num)
+  when 'd'
+    /\b[1-9]|[1-4][0-9]|50\b/.match(num) && num.to_f() >= 1.00
+  end
+end
+
+def usd(num)
+  if num.to_s().include?('.')
+    new_num = sprintf("%.2f", num)
+    whole, decimal = new_num.split('.')
+    count = 4
+    until count > whole.size()
+      whole = whole.insert(-count, ',')
+      count += 4
+    end
+    "$#{whole}.#{decimal}"
+  else
+    whole = num
+    count = 4
+    until count > whole.size()
+      whole = whole.insert(-count, ',')
+      count += 4
+    end
+    "$#{whole}"
+  end
 end
 
 prompt('welcome')
 
+history = []
 loop do
-  prompt('main_menu')
-
+  menu_option = ''
   loop do
     prompt('options')
-    option = gets().chomp().strip().downcase()
+    menu_option = gets().chomp().strip().downcase()
 
-    if option == 'q'
+    case menu_option
+    when 'c'
+      break
+    when 'd'
+      prompt('definitions')
+    when 'h'
+      if history.empty?
+        prompt('no_history')
+      else
+        prompt('history')
+        puts history
+      end
+    when 'q'
       prompt('goodbye')
       exit(true)
-    elsif %w('s', 'd', 'h').include?(option)
-      break
     else
       prompt('invalid_option')
     end
   end
 
- loop do
-    prompt('')
+  loop do
+    prompt('principal')
+    principal = gets().chomp().strip()
+    principal = principal.delete ","
+    until valid?(principal, 'p')
+      prompt('invalid_p')
+      principal = gets().chomp().strip()
+    end
 
+    prompt('apr')
+    apr = gets().chomp().strip()
+    until valid?(apr, 'a')
+      prompt('invalid_apr')
+      apr = gets().chomp().strip()
+    end
 
+    prompt('duration')
+    duration = gets().chomp().strip()
+    until valid?(duration, 'd')
+      prompt('invalid_duration')
+      duration = gets().chomp().strip()
+    end
 
+    if apr.to_f().zero?
+      m_payment = principal.to_f() / duration.to_f()
+    else
+      m_payment = principal.to_f() * (((apr.to_f() / 100) / 12) /
+      (1 - (1 + ((apr.to_f() / 100) / 12))**((-1) * (duration.to_f()))))
+    end
+    total_interest = (m_payment.to_f() * duration.to_f()) - principal.to_f()
+    total_paid = principal.to_f() + total_interest
 
-=begin
-m = p * (j / (1 - (1 + j)**(-n)))
+    result =
+      "\tFor a #{usd(principal)} mortgage " \
+        "at #{apr}% APR, #{duration} month(s):\n" \
+      "\t\tMonthly payment: #{usd(m_payment)}\n" \
+      "\t\tTotal interest: #{usd(total_interest)}\n" \
+      "\t\tTotal principal and interest (without fees): #{usd(total_paid)}\n"
+    puts result
+    history.push(result)
 
-
-m = monthly payment
-p = loan amount
-j = monthly interest rate
-n = loan duration in months
-=end
+    prompt('calculate_again')
+    again = gets().chomp().strip()
+    break unless again.downcase().start_with?('y')
+  end
+end
