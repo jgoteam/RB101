@@ -1,9 +1,9 @@
 require 'yaml'
 MESSAGES = YAML.load_file('mortgage_messages.yml')
 
-def prompt(message, post="")
+def prompt(message)
   message = MESSAGES[message]
-  puts("=> #{message} #{post}")
+  puts("=> #{message}")
 end
 
 def valid?(num, option)
