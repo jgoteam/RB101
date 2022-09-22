@@ -13,7 +13,7 @@ def valid?(num, option)
   when 'a'
     /^1?\d?\d{1}\.?\d{0,2}$/.match(num)
   when 'd'
-    /\b[1-9]|[1-4][0-9]|50\b/.match(num) && num.to_f() >= 1.00
+    /\b[1-9]|[1-9][0-9]|[1-5][0-9][0-9]|600\b/.match(num) && num.to_f() >= 1.00
   end
 end
 
