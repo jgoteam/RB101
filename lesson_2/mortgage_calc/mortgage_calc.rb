@@ -9,32 +9,24 @@ end
 def valid?(num, option)
   case option
   when 'p'
-    /^\d*\.?\d+$/.match(num) && num.to_f() >= 1.00
+    /^\d*\.?\d+$/.match(num) && num.to_f >= 1.00
   when 'a'
-    /^1?\d?\d{1}\.?\d{0,2}$/.match(num)
+    num.to_f >= 0.0 && num.to_f <= 100.0
   when 'd'
-    /\b[1-9]|[1-9][0-9]|[1-5][0-9][0-9]|600\b/.match(num) && num.to_f() >= 1.00
+    num.to_i >= 1 && num.to_i <= 600
   end
 end
 
 def usd(num)
-  if num.to_s().include?('.')
-    new_num = format("%.2f", num)
-    whole, decimal = new_num.split('.')
-    count = 4
-    until count > whole.size()
-      whole = whole.insert(-count, ',')
-      count += 4
-    end
-    "$#{whole}.#{decimal}"
+  if num.to_s.include?('.')
+    num_with_d = format("%.2f", num)
+    whole, decimal = num_with_d.split('.')
+    whole_w_commas = whole.chars.reverse.each_slice(3)
+                          .map(&:join).join(",").reverse
+    [whole_w_commas, decimal].join(".").insert(0, "$ ")
   else
-    whole = num
-    count = 4
-    until count > whole.size()
-      whole = whole.insert(-count, ',')
-      count += 4
-    end
-    "$#{whole}"
+    num.chars.reverse.each_slice(3)
+       .map(&:join).join(",").reverse.insert(0, "$ ")
   end
 end
 
@@ -45,8 +37,8 @@ loop do
   menu_option = ''
   loop do
     prompt('options')
-    menu_option = gets().chomp().strip().downcase()
-
+    menu_option = gets.chomp.strip.downcase
+    system('clear') || system('cls')
     case menu_option
     when 'c'
       break
@@ -69,35 +61,35 @@ loop do
 
   loop do
     prompt('principal')
-    principal = gets().chomp().strip()
+    principal = gets.chomp.strip
     principal = principal.delete ","
     until valid?(principal, 'p')
       prompt('invalid_p')
-      principal = gets().chomp().strip()
+      principal = gets.chomp.strip
     end
 
     prompt('apr')
-    apr = gets().chomp().strip()
+    apr = gets.chomp.strip
     until valid?(apr, 'a')
       prompt('invalid_apr')
-      apr = gets().chomp().strip()
+      apr = gets.chomp.strip
     end
 
     prompt('duration')
     duration = gets().chomp().strip()
     until valid?(duration, 'd')
       prompt('invalid_duration')
-      duration = gets().chomp().strip()
+      duration = gets.chomp.strip
     end
 
-    if apr.to_f().zero?
-      m_payment = principal.to_f() / duration.to_f()
+    if apr.to_f.zero?
+      m_payment = principal.to_f / duration.to_i
     else
-      m_payment = principal.to_f() * (((apr.to_f() / 100) / 12) /
-      (1 - (1 + ((apr.to_f() / 100) / 12))**((-1) * (duration.to_f()))))
+      m_payment = principal.to_f * (((apr.to_f / 100) / 12) /
+      (1 - (1 + ((apr.to_f / 100) / 12))**((-1) * (duration.to_i))))
     end
-    total_interest = (m_payment.to_f() * duration.to_f()) - principal.to_f()
-    total_paid = principal.to_f() + total_interest
+    total_interest = (m_payment.to_f * duration.to_i) - principal.to_f
+    total_paid = principal.to_f + total_interest
 
     result =
       "\tFor a #{usd(principal)} mortgage " \
@@ -109,7 +101,8 @@ loop do
     history.push(result)
 
     prompt('calculate_again')
-    again = gets().chomp().strip()
-    break unless again.downcase().start_with?('y')
+    again = gets.chomp.strip
+    system('clear') || system('cls')
+    break unless again.downcase.start_with?('y')
   end
 end

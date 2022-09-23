@@ -5,9 +5,9 @@ principal: "What's the mortgage amount in dollars? "
 apr: "What's the Annual Percentage Rate(APR) as a percentage? (0 - 100) "
 duration: "What's the duration of this mortgage (in months)? "
 calculate_again: "Make another calculation? (Enter 'y' to calculate again): "
-no_history: "You haven't put in any calculations yet!"
+no_history: "No history. You haven't put in any calculations yet!"
 history: "--History--"
-goodbye: "Thank you for using the monthly payment calculator for mortgages. Goodbye!"
+goodbye: "Thank you for using the mortgage calculator. Goodbye!"
 
 # error messages
 invalid_option: "That's not a valid option. Please try again."
@@ -16,7 +16,7 @@ invalid_apr: "APR should be a number between 0 - 100 only. Please try again."
 invalid_duration: "Mortgage duration in months should be a whole number between 1 - 600 only. Please try again."
 
 # definitions
-definitions: "\n
+definitions: "--Definitions--\n
 Principal\n
 \tThe principal is the amount of a mortgage loan that you have to pay back.\n
 \tYour monthly payment includes a portion of that principal.\n
@@ -35,6 +35,6 @@ APR vs APY\n
 \tHere's how APY is calculated:\n
 \t\tAPY = (1 + Periodic Rate)^(Number of periods) - 1\n
 \n
-\n
-Definitions for Principal and Interest rate from: https://www.consumerfinance.gov/consumer-tools/mortgages/answers/key-terms/\n
-Comparison between APR and APY from: https://www.investopedia.com/terms/a/apy.asp\n"
+\n"
+# Definitions for Principal and Interest rate from: https://www.consumerfinance.gov/consumer-tools/mortgages/answers/key-terms/\n
+# Comparison between APR and APY from: https://www.investopedia.com/terms/a/apy.asp\n"
