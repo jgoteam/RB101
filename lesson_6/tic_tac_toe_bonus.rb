@@ -214,7 +214,7 @@ def display_final_score(final_score, winner, algo_loaded)
   puts ""
 end
 
-loop do # main game loop
+loop do
   intro
   user_selection = who_chooses_first
   current_player = who_first(user_selection)
@@ -227,7 +227,7 @@ loop do # main game loop
 
   match_scoreboard = { Player: 0, Computer: 0, Draws: 0 }
   round_num = 1
-  loop do # round loop
+  loop do
     board = initialize_board
     loop do
       display_board(board, round_num, match_scoreboard, algo_name)
