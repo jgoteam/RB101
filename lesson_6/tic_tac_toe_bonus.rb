@@ -16,10 +16,11 @@ def intro
   prompt ""
 end
 
-def display_board(brd, current_round, current_score, algo_loaded)
+# rubocop: disable Metrics/AbcSize, Metrics/MethodLength
+def display_board(brd, current_round, current_score, algo_name)
   system('clear') || system('cls')
   puts "\t Player [ '#{PLAYER_MARKER}' ]: #{current_score[:Player]}"
-  puts "    Computer (#{algo_loaded}) [ '#{COMPUTER_MARKER}' ]: " \
+  puts "    Computer (#{algo_name}) [ '#{COMPUTER_MARKER}' ]: " \
    "#{current_score[:Computer]}"
   puts "    ___________________________ "
   puts "   |          ROUND #{current_round}          |"
@@ -38,6 +39,7 @@ def display_board(brd, current_round, current_score, algo_loaded)
   puts "\t     |     |"
   puts ""
 end
+# rubocop: enable Metrics/AbcSize, Metrics/MethodLength
 
 def initialize_board
   (1..9).each_with_object({}) { |num, hash| hash[num] = INITIAL_MARKER }
@@ -115,6 +117,7 @@ def medium_algo(brd)
   d_squares.empty? ? empty_squares(brd).sample : d_squares.sample
 end
 
+# rubocop: disable Metrics/CyclomaticComplexity
 def hard_algo(brd)
   atk_squares = []
   WINNING_LINES.each do |line|
@@ -127,6 +130,7 @@ def hard_algo(brd)
   return 5 if brd[5] == INITIAL_MARKER
   atk_squares.empty? ? medium_algo(brd) : atk_squares.sample
 end
+# rubocop: enable Metrics/CyclomaticComplexity
 
 def player_goes!(brd)
   square = ''
@@ -134,7 +138,7 @@ def player_goes!(brd)
     prompt "Choose a square (#{joinor(empty_squares(brd))}): "
     square = gets.chomp
     break if empty_squares(brd).include?(square.to_i) &&
-              square.to_i.to_s == square
+             square.to_i.to_s == square
     prompt "Sorry that's not a valid choice."
   end
   brd[square.to_i] = PLAYER_MARKER
