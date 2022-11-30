@@ -2,15 +2,9 @@ require 'io/console'
 
 SUITS = ['♠', '♥', '♦', '♣']
 POSSIBLE_CARDS = ('2'..'10').to_a + ['J', 'Q', 'K', 'A']
-CARD_VALUES = (POSSIBLE_CARDS).each_with_object({}) do |card, new_hash|
-                if (2..10).include?(card.to_i)
-                  new_hash[card] = card.to_i
-                elsif ['J', 'Q', 'K'].include?(card)
-                  new_hash[card] = 10
-                else
-                  new_hash[card] = [1,11]
-                end
-              end
+CARD_VALUES = { '2' => 2, '3' => 3, '4' => 4, '5' => 5, '6' => 6,
+                '7' => 7, '8' => 8, '9' => 9, '10' => 10,
+                'J' => 10, 'Q' => 10, 'K' => 10, 'A' => [1, 11] }
 MAX_NO_BUST = 21
 NUM_TO_WIN = 1
 
@@ -18,8 +12,16 @@ def prompt(msg)
   puts "=> #{msg}"
 end
 
+def welcome
+  prompt "Let's play 21!"
+  prompt "Best to #{NUM_TO_WIN} wins"
+  prompt ""
+  prompt "Press any key to start!"
+  STDIN.getch
+end
+
 def new_deck
-  (POSSIBLE_CARDS*4).zip(SUITS*13).shuffle
+  (POSSIBLE_CARDS * 4).zip(SUITS * 13).shuffle
 end
 
 def deal_card!(player, deck)
@@ -27,22 +29,33 @@ def deal_card!(player, deck)
   player << drawn_card
 end
 
-def add_hidden_card!(dealer, deck)
+def add_hidden_card!(dealer)
   dealer << ["?", "?"]
+end
+
+def reveal_card!(dealer, gdeck)
+  dealer.delete_at(1)
+  deal_card!(dealer, gdeck)
+  prompt "Dealer will reveal card"
+  thinking
 end
 
 def find_total(whos_hand)
   total = 0
-  whos_hand.each do |card|
-    if card.first == 'A'
-      total + CARD_VALUES[card[0]][1] > MAX_NO_BUST ? total += CARD_VALUES[card[0]][0] : total += CARD_VALUES[card[0]][1]
-    else
-      total += CARD_VALUES[card[0]]
-    end
+  ace_count = whos_hand.count { |card| card[0] == 'A' }
+  whos_hand.reverse.each do |card|
+    add_on = if card.first == 'A'
+               CARD_VALUES[card[0]][1]
+             else
+               CARD_VALUES[card[0]]
+             end
+    total += add_on
   end
+  ace_count.times { total -= 10 if total > MAX_NO_BUST }
   total
 end
 
+# rubocop: disable Metrics/AbcSize, Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity, Metrics/MethodLength
 def display_hand(whos_hand)
   (whos_hand.size).times { print " ________   " }
   puts
@@ -89,13 +102,14 @@ def display_hand(whos_hand)
   end
   puts
 end
+# rubocop: enable Metrics/AbcSize, Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity, Metrics/MethodLength
 
-def display_board(round_num, player, dealer, match_scoreboard)
+def display_board(round_num, player, dealer, scoreboard)
   system('clear') || system('cls')
-  puts "     Dealer: #{match_scoreboard[:Dealer]}\t     Player: #{match_scoreboard[:Player]}"
-  puts "    ___________________________ "
-  puts "   |          ROUND #{round_num}          |"
-  puts "   |___________________________|"
+  puts "  Dealer: #{scoreboard[:Dealer]}\t  Player: #{scoreboard[:Player]}"
+  puts " ___________________________ "
+  puts "|          ROUND #{round_num}          |"
+  puts "|___________________________|"
   puts ""
   puts "Dealer"
   display_hand(dealer)
@@ -116,47 +130,48 @@ def thinking
   puts ""
 end
 
-def new_round!(player, dealer, deck, round_num, match_scoreboard)
+def new_round!(player, dealer, deck)
   2.times { deal_card!(player, deck) }
   deal_card!(dealer, deck)
-  add_hidden_card!(dealer, deck)
+  add_hidden_card!(dealer)
 end
 
 def busted?(whos_hand)
   find_total(whos_hand) > MAX_NO_BUST
 end
 
-def player_goes!(player, dealer, gdeck, round_num, match_scoreboard)
-  prompt "Player's turn"
-  p_action = nil
+def hit_or_stay(player)
+  choice = nil
   loop do
-    loop do
-      prompt "1) Hit or 2) Stay"
-      prompt "(Note that you currently have 21!)" if find_total(player) == 21
-      p_action = gets.chomp.to_i
-      break if [1,2].include?(p_action)
-      prompt "That's not a valid choice. Please enter 1 or 2."
-    end
+    prompt "1) Hit or 2) Stay"
+    prompt "(Note..you currently have 21!)" if find_total(player) == 21
+    choice = gets.chomp.to_i
+    break if [1, 2].include?(choice)
+    prompt "That's not a valid choice. Please enter 1 or 2."
+  end
+  choice
+end
+
+def player_goes!(player, dealer, gdeck, round_num, scoreboard)
+  prompt "Player's turn"
+  loop do
+    p_action = hit_or_stay(player)
     if p_action == 1
       deal_card!(player, gdeck)
       break if busted?(player)
-      display_board(round_num, player, dealer, match_scoreboard)
+      display_board(round_num, player, dealer, scoreboard)
     else
       prompt "You chose to stay"
-      thinking
-      break
+      break thinking
     end
   end
 end
 
-def dealer_goes!(dealer, player, gdeck, round_num, match_scoreboard)
+def dealer_goes!(dealer, player, gdeck, round_num, scoreboard)
   prompt "Dealer's turn"
-  dealer.delete_at(1)
-  deal_card!(dealer, gdeck)
-  prompt "Dealer will reveal card"
-  thinking
+  reveal_card!(dealer, gdeck)
   loop do
-    display_board(round_num, player, dealer, match_scoreboard)
+    display_board(round_num, player, dealer, scoreboard)
     prompt "Dealer's turn"
     if find_total(dealer) <= 16
       prompt "Dealer has 16 or less, and must hit"
@@ -165,33 +180,33 @@ def dealer_goes!(dealer, player, gdeck, round_num, match_scoreboard)
       break if busted?(dealer)
     else
       prompt "Dealer has at least 17, and must stay"
-      thinking
-      break
+      break thinking
     end
   end
 end
 
-def run_round!(player, dealer, deck, round_num, match_scoreboard)
+def run_round!(player, dealer, deck, round_num, scoreboard)
   1.times do |_|
-    display_board(round_num, player, dealer, match_scoreboard)
-    player_goes!(player, dealer, deck, round_num, match_scoreboard)
+    display_board(round_num, player, dealer, scoreboard)
+    player_goes!(player, dealer, deck, round_num, scoreboard)
     break if busted?(player)
 
-    display_board(round_num, player, dealer, match_scoreboard)
-    dealer_goes!( dealer, player, deck, round_num, match_scoreboard)
+    display_board(round_num, player, dealer, scoreboard)
+    dealer_goes!(dealer, player, deck, round_num, scoreboard)
     break if busted?(dealer)
     break
   end
+  display_board(round_num, player, dealer, scoreboard)
 end
 
-def detect_match_winner(match_scoreboard)
-  return 'Player' if match_scoreboard[:Player] == NUM_TO_WIN
-  return 'Dealer' if match_scoreboard[:Dealer] == NUM_TO_WIN
+def detect_match_winner(scoreboard)
+  return 'Player' if scoreboard[:Player] == NUM_TO_WIN
+  return 'Dealer' if scoreboard[:Dealer] == NUM_TO_WIN
   nil
 end
 
-def match_won?(match_scoreboard)
-  !!detect_match_winner(match_scoreboard)
+def match_won?(scoreboard)
+  !!detect_match_winner(scoreboard)
 end
 
 def match_continues(round_num)
@@ -204,29 +219,42 @@ def match_ends
   STDIN.getch
 end
 
-def post_round(player, dealer, round_num, match_scoreboard)
-  display_board(round_num, player, dealer, match_scoreboard)
-  if busted?(player)
-    puts "Player lost round #{round_num}, busted with: #{find_total(player)}"
-    match_scoreboard[:Dealer] += 1
-  elsif busted?(dealer)
-    puts "Player won round #{round_num}. Dealer busted with: #{find_total(dealer)}"
-    match_scoreboard[:Player] += 1
+def show_result(p_total, d_total, round_num)
+  if p_total > MAX_NO_BUST
+    puts "Player lost round #{round_num}, " \
+         "busted with: #{p_total}"
+  elsif d_total > MAX_NO_BUST
+    puts "Player won round #{round_num}. " \
+         "Dealer busted with: #{d_total}"
+  elsif d_total > p_total
+    puts "Dealer won round #{round_num}. " \
+         "#{d_total} vs #{p_total}"
+  elsif p_total > d_total
+    puts "You won round #{round_num}. " \
+         "#{p_total} vs #{d_total}"
   else
-    if find_total(dealer) > find_total(player)
-      puts "Dealer won round #{round_num}. #{find_total(dealer)} vs #{find_total(player)}"
-      match_scoreboard[:Dealer] += 1
-    elsif find_total(player) > find_total(dealer)
-      puts "You won round #{round_num}. #{find_total(player)} vs #{find_total(dealer)}"
-      match_scoreboard[:Player] += 1
-    else
-      puts "Push for round #{round_num}. Both had #{find_total(dealer)}"
-      match_scoreboard[:Pushes] += 1
-    end
+    puts "Push for round #{round_num}. Both had #{d_total}"
   end
-  puts
-  display_board(round_num, player, dealer, match_scoreboard)
-  match_won?(match_scoreboard) ? match_ends : match_continues(round_num)
+end
+
+def update_scores(p_total, d_total, scoreboard)
+  if p_total > MAX_NO_BUST
+    scoreboard[:Dealer] += 1
+  elsif d_total > MAX_NO_BUST
+    scoreboard[:Player] += 1
+  elsif d_total > p_total
+    scoreboard[:Dealer] += 1
+  elsif p_total > d_total
+    scoreboard[:Player] += 1
+  else
+    scoreboard[:Pushes] += 1
+  end
+end
+
+def post_round(p_total, d_total, round_num, scoreboard)
+  show_result(p_total, d_total, round_num)
+  update_scores(p_total, d_total, scoreboard)
+  match_won?(scoreboard) ? match_ends : match_continues(round_num)
 end
 
 def display_final_score(final_score, winner)
@@ -242,31 +270,26 @@ def display_final_score(final_score, winner)
   puts ""
 end
 
-def welcome
-  prompt "Let's play 21!"
-  prompt "Best to #{NUM_TO_WIN} wins"
-  prompt ""
-  prompt "Press any key to start!"
-  STDIN.getch
-end
-
 loop do
   welcome
 
   deck = []
   deck = new_deck
   round_num = 1
-  match_scoreboard = { Player: 0, Dealer: 0, Pushes: 0 }
+  scoreboard = { Player: 0, Dealer: 0, Pushes: 0 }
   loop do
     player = []
     dealer = []
-    new_round!(player, dealer, deck, round_num, match_scoreboard)
-    run_round!(player, dealer, deck, round_num, match_scoreboard)
-    post_round(player, dealer, round_num, match_scoreboard)
+    new_round!(player, dealer, deck)
+    run_round!(player, dealer, deck, round_num, scoreboard)
+    p_total = find_total(player)
+    d_total = p_total > MAX_NO_BUST ? 0 : find_total(dealer)
+
+    post_round(p_total, d_total, round_num, scoreboard)
     round_num += 1
-    break if match_won?(match_scoreboard)
+    break if match_won?(scoreboard)
   end
-  display_final_score(match_scoreboard, detect_match_winner(match_scoreboard))
+  display_final_score(scoreboard, detect_match_winner(scoreboard))
 
   prompt "Play again? (y or n)"
   answer = gets.chomp
