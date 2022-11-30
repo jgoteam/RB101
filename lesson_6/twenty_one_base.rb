@@ -3,7 +3,7 @@ require 'io/console'
 SUITS = ['♠', '♥', '♦', '♣']
 POSSIBLE_CARDS = ('2'..'10').to_a + ['J', 'Q', 'K', 'A']
 CARD_VALUES = (POSSIBLE_CARDS).each_with_object({}) do |card, new_hash|
-                if (2..10).include?(card.to_i)
+                if ('2'..'10').to_a.include?(card)
                   new_hash[card] = card.to_i
                 elsif ['J', 'Q', 'K'].include?(card)
                   new_hash[card] = 10
@@ -12,7 +12,7 @@ CARD_VALUES = (POSSIBLE_CARDS).each_with_object({}) do |card, new_hash|
                 end
               end
 MAX_NO_BUST = 21
-NUM_TO_WIN = 5
+NUM_TO_WIN = 1
 
 def prompt(msg)
   puts "=> #{msg}"
@@ -92,7 +92,7 @@ end
 
 def display_board(round_num, player, dealer, match_scoreboard)
   system('clear') || system('cls')
-  puts "     Dealer: #{match_scoreboard[:Dealer]}\tPlayer: #{match_scoreboard[:Player]}"
+  puts "     Dealer: #{match_scoreboard[:Dealer]}\t     Player: #{match_scoreboard[:Player]}"
   puts "    ___________________________ "
   puts "   |          ROUND #{round_num}          |"
   puts "   |___________________________|"
@@ -120,10 +120,6 @@ def new_round!(player, dealer, deck, round_num, match_scoreboard)
   2.times { deal_card!(player, deck) }
   deal_card!(dealer, deck)
   add_hidden_card!(dealer, deck)
-end
-
-def alternate_player!(current_player)
-  current_player == 'Player' ? 'Dealer' : 'Player'
 end
 
 def busted?(whos_hand)
@@ -163,21 +159,29 @@ def dealer_goes!(dealer, player, gdeck, round_num, match_scoreboard)
     display_board(round_num, player, dealer, match_scoreboard)
     prompt "Dealer's turn"
     if find_total(dealer) <= 16
-      prompt "Dealer's hand is 16 or less, and must hit"
+      prompt "Dealer has 16 or less, and must hit"
       thinking
       deal_card!(dealer, gdeck)
       break if busted?(dealer)
     else
-      prompt "Dealer's hand is over 16, and must stay"
+      prompt "Dealer has at least 17, and must stay"
       thinking
       break
     end
   end
 end
 
-def run_turn!(current_player, player, dealer, deck)
-  puts "#{current_player}'s turn"
-  current_player == 'Player' ? player_goes!(player, deck, stay_count) : dealer_goes!(dealer, player, deck, stay_count)
+def run_round!(player, dealer, deck, round_num, match_scoreboard)
+  1.times do |_|
+    display_board(round_num, player, dealer, match_scoreboard)
+    player_goes!(player, dealer, deck, round_num, match_scoreboard)
+    break if busted?(player)
+
+    display_board(round_num, player, dealer, match_scoreboard)
+    dealer_goes!( dealer, player, deck, round_num, match_scoreboard)
+    break if busted?(dealer)
+    break
+  end
 end
 
 def detect_match_winner(match_scoreboard)
@@ -190,7 +194,18 @@ def match_won?(match_scoreboard)
   !!detect_match_winner(match_scoreboard)
 end
 
+def match_continues(round_num)
+  prompt "Press any key to continue to round #{round_num + 1}"
+  STDIN.getch
+end
+
+def match_ends
+  prompt "Match is over! Press any key to continue."
+  STDIN.getch
+end
+
 def post_round(player, dealer, round_num, match_scoreboard)
+  display_board(round_num, player, dealer, match_scoreboard)
   if busted?(player)
     puts "Player lost round #{round_num}, busted with: #{find_total(player)}"
     match_scoreboard[:Dealer] += 1
@@ -210,10 +225,8 @@ def post_round(player, dealer, round_num, match_scoreboard)
     end
   end
   puts
-  unless match_won?(match_scoreboard)
-    prompt "Press any key to continue to Round #{round_num + 1}"
-    STDIN.getch
-  end
+  display_board(round_num, player, dealer, match_scoreboard)
+  match_won?(match_scoreboard) ? match_ends : match_continues(round_num)
 end
 
 def display_final_score(final_score, winner)
@@ -229,33 +242,26 @@ def display_final_score(final_score, winner)
   puts ""
 end
 
-loop do # match loop
+def welcome
   prompt "Let's play 21!"
   prompt "Best to #{NUM_TO_WIN} wins"
   prompt ""
   prompt "Press any key to start!"
   STDIN.getch
+end
+
+loop do
+  welcome
 
   deck = []
   deck = new_deck
   round_num = 1
   match_scoreboard = { Player: 0, Dealer: 0, Pushes: 0 }
-  loop do # round loop
+  loop do
     player = []
     dealer = []
     new_round!(player, dealer, deck, round_num, match_scoreboard)
-    loop do # run round
-      display_board(round_num, player, dealer, match_scoreboard)
-      player_goes!(player, dealer, deck, round_num, match_scoreboard)
-      break if busted?(player)
-
-      display_board(round_num, player, dealer, match_scoreboard)
-      dealer_goes!( dealer, player, deck, round_num, match_scoreboard)
-      break if busted?(dealer)
-      break
-    end
-
-    display_board(round_num, player, dealer, match_scoreboard)
+    run_round!(player, dealer, deck, round_num, match_scoreboard)
     post_round(player, dealer, round_num, match_scoreboard)
     round_num += 1
     break if match_won?(match_scoreboard)
