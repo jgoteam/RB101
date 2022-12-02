@@ -256,10 +256,7 @@ end
 
 loop do
   welcome
-
-  deck = []
   deck = new_deck.shuffle
-
   scoreboard = { Round_num: 1, Player: 0, Dealer: 0, Pushes: 0 }
   loop do
     player = []
