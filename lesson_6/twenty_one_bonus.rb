@@ -62,6 +62,7 @@ def display_hand(whos_hand)
   whos_hand.each do |card|
     print "|" + "    #{card[:rank]}#{card[:suit]}|".rjust(9) + "  "
   end
+  print "Total: #{find_total(whos_hand)}"
   puts
 end
 # rubocop: enable Metrics/AbcSize
