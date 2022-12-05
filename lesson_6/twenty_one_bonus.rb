@@ -155,7 +155,7 @@ def dealer_goes!(dealer, player, gdeck, scoreboard)
   end
 end
 
-def run_round!(player, dealer, deck, round_score, scoreboard)
+def run_round!(player, dealer, deck, hand_scores, scoreboard)
   1.times do
     player_goes!(player, dealer, deck, scoreboard)
     break if busted?(player)
@@ -164,8 +164,8 @@ def run_round!(player, dealer, deck, round_score, scoreboard)
     break if busted?(dealer)
     break
   end
-  round_score[:Player] = find_total(player)
-  round_score[:Dealer] = find_total(dealer)
+  hand_scores[:Player] = find_total(player)
+  hand_scores[:Dealer] = find_total(dealer)
   display_board(player, dealer, scoreboard)
 end
 
@@ -189,42 +189,42 @@ def match_ends
   STDIN.getch
 end
 
-def show_result(round_score, scoreboard)
-  if round_score[:Player] > MAX_NO_BUST
+def show_result(hand_scores, scoreboard)
+  if hand_scores[:Player] > MAX_NO_BUST
     puts "Player lost round #{scoreboard[:Round_num]}, " \
-         "busted with: #{round_score[:Player]}"
-  elsif round_score[:Dealer] > MAX_NO_BUST
+         "busted with: #{hand_scores[:Player]}"
+  elsif hand_scores[:Dealer] > MAX_NO_BUST
     puts "Player won round #{scoreboard[:Round_num]}. " \
-         "Dealer busted with: #{round_score[:Dealer]}"
-  elsif round_score[:Dealer] > round_score[:Player]
+         "Dealer busted with: #{hand_scores[:Dealer]}"
+  elsif hand_scores[:Dealer] > hand_scores[:Player]
     puts "Dealer won round #{scoreboard[:Round_num]}. " \
-         "#{round_score[:Dealer]} vs #{round_score[:Player]}"
-  elsif round_score[:Player] > round_score[:Dealer]
+         "#{hand_scores[:Dealer]} vs #{hand_scores[:Player]}"
+  elsif hand_scores[:Player] > hand_scores[:Dealer]
     puts "You won round #{scoreboard[:Round_num]}. " \
-         "#{round_score[:Player]} vs #{round_score[:Dealer]}"
+         "#{hand_scores[:Player]} vs #{hand_scores[:Dealer]}"
   else
     puts "Push for round #{scoreboard[:Round_num]}. " \
-         "Both had #{round_score[:Dealer]}"
+         "Both had #{hand_scores[:Dealer]}"
   end
 end
 
-def update_scores(round_score, scoreboard)
-  if round_score[:Player] > MAX_NO_BUST
+def update_scores(hand_scores, scoreboard)
+  if hand_scores[:Player] > MAX_NO_BUST
     scoreboard[:Dealer] += 1
-  elsif round_score[:Dealer] > MAX_NO_BUST
+  elsif hand_scores[:Dealer] > MAX_NO_BUST
     scoreboard[:Player] += 1
-  elsif round_score[:Dealer] > round_score[:Player]
+  elsif hand_scores[:Dealer] > hand_scores[:Player]
     scoreboard[:Dealer] += 1
-  elsif round_score[:Player] > round_score[:Dealer]
+  elsif hand_scores[:Player] > hand_scores[:Dealer]
     scoreboard[:Player] += 1
   else
     scoreboard[:Pushes] += 1
   end
 end
 
-def post_round(round_score, scoreboard)
-  show_result(round_score, scoreboard)
-  update_scores(round_score, scoreboard)
+def post_round(hand_scores, scoreboard)
+  show_result(hand_scores, scoreboard)
+  update_scores(hand_scores, scoreboard)
   scoreboard[:Round_num] += 1
   match_won?(scoreboard) ? match_ends : match_continues(scoreboard)
 end
@@ -262,10 +262,10 @@ loop do
   loop do
     player = []
     dealer = []
-    round_score = { Player: 0, Dealer: 0 }
+    hand_scores = { Player: 0, Dealer: 0 }
     new_round!(player, dealer, deck)
-    run_round!(player, dealer, deck, round_score, scoreboard)
-    post_round(round_score, scoreboard)
+    run_round!(player, dealer, deck, hand_scores, scoreboard)
+    post_round(hand_scores, scoreboard)
     break if match_won?(scoreboard)
   end
   display_final_score(scoreboard, detect_match_winner(scoreboard))
