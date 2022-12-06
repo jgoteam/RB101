@@ -6,7 +6,7 @@ CARD_VALUES = { '2' => 2, '3' => 3, '4' => 4, '5' => 5, '6' => 6,
                 '7' => 7, '8' => 8, '9' => 9, '10' => 10,
                 'J' => 10, 'Q' => 10, 'K' => 10, 'A' => 11 }
 MAX_NO_BUST = 21
-NUM_TO_WIN = 5
+NUM_TO_WIN = 1
 
 def prompt(msg)
   puts "=> #{msg}"
@@ -52,7 +52,7 @@ def display_hand(whos_hand)
   (whos_hand.size).times { print " ________   " }
   puts
   whos_hand.each do |card|
-    print "|#{card[:rank]}#{card[:suit]}    ".ljust(9) + "|  "
+    print "|#{card[:rank]}#{card[:suit]}".ljust(9) + "|  "
   end
   3.times do
     puts
@@ -60,7 +60,7 @@ def display_hand(whos_hand)
   end
   puts
   whos_hand.each do |card|
-    print "|" + "    #{card[:rank]}#{card[:suit]}|".rjust(9) + "  "
+    print "|" + "#{card[:rank]}#{card[:suit]}|".rjust(9) + "  "
   end
   print "Total: #{find_total(whos_hand)}"
   puts
@@ -73,7 +73,7 @@ def display_board(player, dealer, scoreboard)
   system('clear') || system('cls')
   puts "  Dealer: #{scoreboard[:Dealer]}\t  Player: #{scoreboard[:Player]}"
   puts " ___________________________ "
-  puts "|          ROUND #{scoreboard[:Round_num]}          |"
+  puts "|          ROUND #{scoreboard[:Round_num]}".ljust(28) + "|"
   puts "|___________________________|"
   puts "\nDealer"
   display_hand(dealer)
@@ -251,7 +251,7 @@ end
 
 loop do
   welcome
-  deck = new_deck.shuffle
+  deck = new_deck.shuffle + new_deck.shuffle
   scoreboard = { Round_num: 1, Player: 0, Dealer: 0, Pushes: 0 }
   loop do
     player = []
