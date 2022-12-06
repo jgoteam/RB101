@@ -47,14 +47,14 @@ def reveal_card!(dealer, gdeck)
   thinking
 end
 
-# rubocop: disable Metrics/AbcSize
+# rubocop: disable Metrics/AbcSize, Metrics/MethodLength
 def display_hand(whos_hand)
   (whos_hand.size).times { print " ________   " }
   puts
   whos_hand.each do |card|
     print "|#{card[:rank]}#{card[:suit]}    ".ljust(9) + "|  "
   end
-  2.times do
+  3.times do
     puts
     (whos_hand.size).times { print "|        |" + "  " }
   end
@@ -64,8 +64,10 @@ def display_hand(whos_hand)
   end
   print "Total: #{find_total(whos_hand)}"
   puts
+  (whos_hand.size).times { print " ‾‾‾‾‾‾‾‾   " }
+  puts
 end
-# rubocop: enable Metrics/AbcSize
+# rubocop: enable Metrics/AbcSize, Metrics/MethodLength
 
 def display_board(player, dealer, scoreboard)
   system('clear') || system('cls')
@@ -140,30 +142,22 @@ end
 def dealer_goes!(dealer, player, gdeck, scoreboard)
   prompt "Dealer's turn"
   reveal_card!(dealer, gdeck)
-  loop do
-    display_board(player, dealer, scoreboard)
+  display_board(player, dealer, scoreboard)
+  until find_total(dealer) > 16
     prompt "Dealer's turn"
-    if find_total(dealer) <= 16
-      prompt "Dealer has 16 or less, and must hit"
-      thinking
-      deal_card!(dealer, gdeck)
-      break if busted?(dealer)
-    else
-      prompt "Dealer has at least 17, and must stay"
-      break thinking
-    end
+    prompt "Dealer has 16 or less, and must hit"
+    thinking
+    deal_card!(dealer, gdeck)
+    display_board(player, dealer, scoreboard)
   end
+  return if busted?(dealer)
+  prompt "Dealer has at least 17, and must stay"
+  thinking
 end
 
 def run_round!(player, dealer, deck, hand_scores, scoreboard)
-  1.times do
-    player_goes!(player, dealer, deck, scoreboard)
-    break if busted?(player)
-
-    dealer_goes!(dealer, player, deck, scoreboard)
-    break if busted?(dealer)
-    break
-  end
+  player_goes!(player, dealer, deck, scoreboard)
+  dealer_goes!(dealer, player, deck, scoreboard) unless busted?(player)
   hand_scores[:Player] = find_total(player)
   hand_scores[:Dealer] = find_total(dealer)
   display_board(player, dealer, scoreboard)
